@@ -1,3 +1,7 @@
-[submodule "rkh"]
-	path = rkh
+[submodule "vendor/rkh"]
+	path = vendor/rkh
 	url = https://git.code.sf.net/p/rkh-reactivesys/code
+
+[submodule "vendor/ceedling"]
+	path = vendor/ceedling
+	url = https://github.com/ThrowTheSwitch/Ceedling.git
