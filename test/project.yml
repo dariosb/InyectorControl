@@ -12,7 +12,7 @@
   :build_root: build
 #  :release_build: TRUE
   :test_file_prefix: test_
-  :which_ceedling: vendor/ceedling
+  :which_ceedling: ../vendor/ceedling
   :default_tasks:
     - test:all
 
@@ -27,14 +27,29 @@
 
 :paths:
   :test:
-    - +:test/**
-    - -:test/support
+    - +:./**
+    - -:support
   :source:
-    - src/**
+    - ../src/**
+    - ../vendor/rkh/source/fwk/src/*
+    - ../vendor/rkh/source/mempool/src/*
+    - ../vendor/rkh/source/portable/test/*
+    - ../vendor/rkh/source/queue/src/*
+    - ../vendor/rkh/source/sm/src/*
+    - ../vendor/rkh/source/sma/src/*
+    - ../vendor/rkh/source/tmr/src/*
+    - ../vendor/rkh/source/trc/src/*
   :include:
-    - inc/**
+    - ../inc/**
+    - ../vendor/rkh/source/fwk/inc/*
+    - ../vendor/rkh/source/mempool/inc/*
+    - ../vendor/rkh/source/queue/inc/*
+    - ../vendor/rkh/source/sm/inc/*
+    - ../vendor/rkh/source/sma/inc/*
+    - ../vendor/rkh/source/tmr/inc/*
+    - ../vendor/rkh/source/trc/inc/*
   :support:
-    - test/support
+    - ./support
 
 :defines:
   # in order to add common defines:
