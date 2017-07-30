@@ -33,7 +33,7 @@
     - ../src/**
     - ../vendor/rkh/source/fwk/src/*
     - ../vendor/rkh/source/mempool/src/*
-    - ../vendor/rkh/source/portable/test/*
+    - ../vendor/rkh/source/portable/80x86/linux_st/gnu/*
     - ../vendor/rkh/source/queue/src/*
     - ../vendor/rkh/source/sm/src/*
     - ../vendor/rkh/source/sma/src/*
@@ -59,6 +59,7 @@
   :test:
     - *common_defines
     - TEST
+    - __LNXGNU__
   :test_preprocess:
     - *common_defines
     - TEST
@@ -103,7 +104,7 @@
 
 :plugins:
   :load_paths:
-    - vendor/ceedling/plugins
+    - ../vendor/ceedling/plugins
   :enabled:
     - stdout_pretty_tests_report
     - module_generator
