@@ -38,6 +38,7 @@
     - vendor/rkh/source/sm/src
     - vendor/rkh/source/sma/src
     - vendor/rkh/source/trc/src
+    - vendor/unitrazer
   :include:
     - inc/**
     - vendor/rkh/source/fwk/inc
@@ -47,6 +48,7 @@
     - vendor/rkh/source/sma/inc
     - vendor/rkh/source/tmr/inc
     - vendor/rkh/source/trc/inc
+    - vendor/unitrazer
   :support:
     - test/support
 
@@ -59,6 +61,7 @@
     - *common_defines
     - TEST
     - __TEST__
+    - __UNITRAZER_LIB__
   :test_preprocess:
     - *common_defines
     - TEST
@@ -97,6 +100,7 @@
   :flag: "${1}"  # or "-L ${1}" for example
   :common: &common_libraries []
   :test:
+    - vendor/unitrazer/unitrzlib.a
     - *common_libraries
   :release:
     - *common_libraries

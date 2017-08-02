@@ -45,12 +45,13 @@
 
 /* ----------------------------- Include files ----------------------------- */
 #include "unity.h"
+#include "unitrazer.h"
 #include "common.h"
 #include "InyControl.h"
 #include "InyControlEvt.h"
 #include "Mock_InyControlAct.h"
 #include "Mock_rkhassert.h"
-#include "Mock_rkhtrc_out.h"
+//#include "Mock_rkhtrc_out.h"
 
 #include "rkhfwk_dynevt.h"
 #include "rkhsm.h"
@@ -60,6 +61,10 @@
 #include "rkhfwk_bittbl.h"
 #include "rkhport.h"
 #include "rkhtrc_stream.h"
+
+#include "unitrzlib.h"
+#include "tzlink.h"
+#include "tzparse.h"
 
 /* ----------------------------- Local macros ------------------------------ */
 /* ------------------------------- Constants ------------------------------- */
@@ -81,21 +86,26 @@ setProfile(RKH_ST_T *currState, RKH_ST_T *nextState)
 void
 setUp(void)
 {
+    sm_init(); 
     Mock_InyControlAct_Init();
     Mock_rkhassert_Init();
-    Mock_rkhtrc_out_Init();
+ //   Mock_rkhtrc_out_Init();
 }
 
 void
 tearDown(void)
 {
+    sm_verify(); /* Makes sure there are no unused expectations, if */
+                 /* there are, this function causes the test to fail. */
+    sm_cleanup();
+
     Mock_InyControlAct_Verify();
     Mock_rkhassert_Verify();
-    Mock_rkhtrc_out_Verify();
+//    Mock_rkhtrc_out_Verify();
 
     Mock_InyControlAct_Destroy();
     Mock_rkhassert_Destroy();
-    Mock_rkhtrc_out_Destroy();
+//    Mock_rkhtrc_out_Destroy();
 }
 
 void

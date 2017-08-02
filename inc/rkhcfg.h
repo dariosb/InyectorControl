@@ -361,7 +361,7 @@
  *	If the #RKH_CFG_TRC_EN is set to 1 then RKH will include the trace
  *	facility.
  */
-#define RKH_CFG_TRC_EN                  RKH_DISABLED
+#define RKH_CFG_TRC_EN                  RKH_ENABLED
 
 /**
  *	If the #RKH_CFG_TRC_RTFIL_EN is set to 1 then RKH will include
