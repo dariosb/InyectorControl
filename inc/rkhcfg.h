@@ -291,14 +291,14 @@
  *	prototype will add as argument a pointer to ocurred event.
  *	See RKH_TRN_ACT_T definition.
  */
-#define RKH_CFG_SMA_ACT_ARG_EVT_EN      RKH_ENABLED
+#define RKH_CFG_SMA_ACT_ARG_EVT_EN      RKH_DISABLED
 
 /**
  *	If the #RKH_CFG_SMA_GRD_ARG_EVT_EN is set to 1 then the transition guard
  *	prototype will add as argument a pointer to ocurred event.
  *	See RKH_GUARD_T definition.
  */
-#define RKH_CFG_SMA_GRD_ARG_EVT_EN      RKH_ENABLED
+#define RKH_CFG_SMA_GRD_ARG_EVT_EN      RKH_DISABLED
 
 /**
  *	If the #RKH_CFG_SMA_GRD_ARG_SMA_EN is set to 1 then the transition guard

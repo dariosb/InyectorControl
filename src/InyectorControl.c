@@ -18,7 +18,7 @@
 #include "rkh.h"
 #include "rkhfwk_dynevt.h"
 #include "InyectorControl.h"
-#include "bsp.h"
+#include "InyectorControlAct.h"
 
 /* ----------------------------- Local macros ------------------------------ */
 /* ------------------------------- Constants ------------------------------- */
@@ -58,66 +58,12 @@ struct InyectorControl
 /* ---------------------------- Global variables --------------------------- */
 /* ============================= Active object ============================= */
 RKH_SMA_CREATE( InyectorControl, inyectorControl,
-                0, FLAT, &idle, InyectorControlAct_init, NULL);
+                0, FLAT, &off, InyectorControlAct_init, NULL);
 RKH_SMA_DEF_PTR(inyectorControl);
 
 /* ---------------------------- Local variables ---------------------------- */
-/*
- *  Declare and allocate the 'e_tout' event.
- *  The 'e_tout' event with TIMEOUT signal never changes, so it can be
- *  statically allocated just once by means of RKH_ROM_STATIC_EVENT() macro.
- */
-static RKH_ROM_STATIC_EVENT(e_tout, TMREVT);
-
 /* ----------------------- Local function prototypes ----------------------- */
 /* ---------------------------- Local functions ---------------------------- */
 /* ---------------------------- Global functions --------------------------- */
 /* ============================ Initial action ============================= */
-void
-oven_init(InyectorControl *const me)
-{
-    bsp_ovenInit();
-
-    /* send objects to trazer */
-    RKH_TR_FWK_AO(me);
-    RKH_TR_FWK_STATE(me, &idle);
-    RKH_TR_FWK_STATE(me, &ready);
-    RKH_TR_FWK_STATE(me, &cooking);
-    RKH_TR_FWK_OBJ(&me->timer);
-    RKH_TR_FWK_FUN(&oven_init);
-    RKH_TR_FWK_FUN(&cook_start);
-    RKH_TR_FWK_FUN(&cook_stop);
-
-    /* send signals to trazer */
-    RKH_TR_FWK_SIG(OPEN);
-    RKH_TR_FWK_SIG(CLOSE);
-    RKH_TR_FWK_SIG(START);
-    RKH_TR_FWK_SIG(TMREVT);
-    RKH_TR_FWK_SIG(TERM);
-
-    RKH_TMR_INIT(&me->timer, &e_tout, NULL);
-}
-
-/* ============================ Effect actions ============================= */
-/* ============================= Entry actions ============================= */
-void
-cook_start(Oven *const me, RKH_EVT_T *pe)
-{
-    (void)pe;
-
-    RKH_TMR_ONESHOT(&me->timer, RKH_UPCAST(RKH_SMA_T, me), COOK_TIME);
-    bsp_emitterOn();
-}
-
-/* ============================= Exit actions ============================== */
-void
-cook_stop(Oven *const me, RKH_EVT_T *pe)
-{
-    (void)pe;
-
-    rkh_tmr_stop(&me->timer);
-    bsp_emitterOff();
-}
-
-/* ================================ Guards ================================= */
 /* ------------------------------ End of file ------------------------------ */

@@ -72,8 +72,6 @@ InyectorControlAct_init(InyectorControl *const me)
 
     RKH_TMR_INIT(&me->timer, &e_StartTimeout, NULL);
 
-
-
     tempVal = rpmVal = throttleVal = 0;
     duty = 0;
 
@@ -88,7 +86,7 @@ InyectorControlAct_init(InyectorControl *const me)
 
 /* Effect actions */
 void 
-InyectorControlAct_onIdleSpeed(InyectorControl *const me, RKH_EVT_T *event)
+InyectorControlAct_onIdleSpeed(InyectorControl *const me)
 {
     tempVal = Sensor_get((Sensor *)temp);
     rpmVal = Sensor_get((Sensor *)rpm);
@@ -98,7 +96,7 @@ InyectorControlAct_onIdleSpeed(InyectorControl *const me, RKH_EVT_T *event)
 }
 
 void 
-InyectorControlAct_onNormal(InyectorControl *const me, RKH_EVT_T *event)
+InyectorControlAct_onNormal(InyectorControl *const me)
 {
     tempVal = Sensor_get((Sensor *)temp);
     rpmVal = Sensor_get((Sensor *)rpm);
@@ -116,14 +114,14 @@ InyectorControlAct_onNormal(InyectorControl *const me, RKH_EVT_T *event)
 
 /* Guard actions */
 bool 
-InyectorControlAct_isPressedThrottle(InyectorControl *const me, RKH_EVT_T *event)
+InyectorControlAct_isPressedThrottle(InyectorControl *const me)
 {
     throttleVal = Sensor_get((Sensor *)throttle);
     return throttleVal > THROTTLE_MIN;
 }
 
 bool 
-InyectorControlAct_isReleasedThrottle(InyectorControl *const me, RKH_EVT_T *event)
+InyectorControlAct_isReleasedThrottle(InyectorControl *const me)
 {
     throttleVal  = Sensor_get((Sensor *)throttle);
     return throttleVal <= THROTTLE_MIN;
@@ -132,7 +130,7 @@ InyectorControlAct_isReleasedThrottle(InyectorControl *const me, RKH_EVT_T *even
 
 /* Entry actions */
 void 
-InyectorControlAct_starting(InyectorControl *const me, RKH_EVT_T *event)
+InyectorControlAct_starting(InyectorControl *const me)
 {
     RKH_TMR_ONESHOT(&me->timer, RKH_UPCAST(RKH_SMA_T, me), START_TIME);
     PWMInyector_setDuty(START_DUTY);

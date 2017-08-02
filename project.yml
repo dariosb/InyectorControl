@@ -29,7 +29,6 @@
   :test:
     - +:test/**
     - -:test/support
-    - -:test/support
   :source:
     - src/**
     - vendor/rkh/source/fwk/src

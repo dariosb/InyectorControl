@@ -32,18 +32,18 @@ extern "C" {
 /* -------------------------- External variables --------------------------- */
 /* -------------------------- Function prototypes -------------------------- */
 /* Init action */
-void InyectorControlAct_init(InyectorControl *const me) 
+void InyectorControlAct_init(InyectorControl *const me); 
 
 /* Effect actions */
-void InyectorControlAct_onIdleSpeed(InyectorControl *const me, RKH_EVT_T *event);
-void InyectorControlAct_onNormal(InyectorControl *const me, RKH_EVT_T *event);
+void InyectorControlAct_onIdleSpeed(InyectorControl *const me);
+void InyectorControlAct_onNormal(InyectorControl *const me);
 
 /* Guard actions */
-bool InyectorControlAct_isPressedThrottle(InyectorControl *const me, RKH_EVT_T *event);
-bool InyectorControlAct_isReleasedThrottle(InyectorControl *const me, RKH_EVT_T *event);
+rbool_t InyectorControlAct_isPressedThrottle(InyectorControl *const me);
+rbool_t InyectorControlAct_isReleasedThrottle(InyectorControl *const me);
 
 /* Entry actions */
-void InyectorControlAct_starting(InyectorControl *const me, RKH_EVT_T *event);
+void InyectorControlAct_starting(InyectorControl *const me);
 
 /* Exit actions */
 /* -------------------- External C language linkage end -------------------- */

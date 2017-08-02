@@ -45,24 +45,47 @@
 
 /* ----------------------------- Include files ----------------------------- */
 #include "unity.h"
+#include "common.h"
+#include "rkh.h"
+
+/**************************************/
+/*
+ * Ceedling bug????
+ * https://github.com/ThrowTheSwitch/Ceedling/issues/10
+ * have to include all rkh header to force compilation because is not linking
+ */
+#include "rkhfwk_dynevt.h"
+#include "rkhsm.h"
+#include "rkhtrc.h"
+#include "rkhtrc_filter.h"
+#include "rkhtrc_record.h"
+#include "rkhfwk_bittbl.h"
+#include "rkhport.h"
+#include "rkhtrc_stream.h"
+/**************************************/
+
 #include "InyectorControl.h"
 #include "Mock_InyectorControlAct.h"
+#include "Mock_rkhassert.h"
+#include "Mock_rkhtrc_out.h"
 
 /* ----------------------------- Local macros ------------------------------ */
 /* ------------------------------- Constants ------------------------------- */
 /* ---------------------------- Local data types --------------------------- */
 /* ---------------------------- Global variables --------------------------- */
 /* ---------------------------- Local variables ---------------------------- */
-static int state, expectNextState;
-static Event event;
+static RKH_ST_T *state, *expectNextState;
+
+static RKH_STATIC_EVENT(eventStartTimeout, evStartTimeout);
+static RKH_STATIC_EVENT(eventStart,        evStart);
+static RKH_STATIC_EVENT(eventTick,         evTick);
 
 /* ----------------------- Local function prototypes ----------------------- */
 /* ---------------------------- Local functions ---------------------------- */
 static void
-setProfile(int currState, int nextState, int signal)
+setProfile(RKH_ST_T *currState, RKH_ST_T *nextState)
 {
-    InyectorControl_setState(currState);
-    event.signal = signal;
+    setState((RKH_SMA_T *)inyectorControl, currState);
     expectNextState = nextState;
 }
 
@@ -83,79 +106,95 @@ tearDown(void)
 void
 test_DefaultStateAfterInit(void)
 {
-    InyectorControlAct_init_Expect();
-    expectNextState = InyectorControl_init();
-    TEST_ASSERT_EQUAL(off, expectNextState);
+    setProfile(RKH_STATE_CAST(&off), RKH_STATE_CAST(&off));
+
+    InyectorControlAct_init_Expect(RKH_CAST(InyectorControl, inyectorControl));
+
+    rkh_sm_init((RKH_SM_T *)inyectorControl);
+    
+    TEST_ASSERT_TRUE(expectNextState == getState(inyectorControl));
 }
 
 void
 test_AnUnhandledEventDoesNotChangeState(void)
 {
-    setProfile(off, UNHANDLED_EVENT, evStartTimeout);
-    state = InyectorControl_dispatch(&event);
-    TEST_ASSERT_EQUAL(expectNextState, state);
-    TEST_ASSERT_EQUAL(off, InyectorControl_getState());
+    setProfile(RKH_STATE_CAST(&off), RKH_STATE_CAST(&off));
+    
+    rkh_sm_dispatch((RKH_SM_T *)inyectorControl, &eventStartTimeout);
+
+    TEST_ASSERT_TRUE(expectNextState == getState(inyectorControl));
 }
 
+#if 0
 void
 test_StateTransitionTableForOff(void)
 {
-    setProfile(off, starting, evStart);
-    InyectorControlAct_starting_Expect(&event);
-    state = InyectorControl_dispatch(&event);
+    _setProfile(off, starting);
+    InyectorControlAct_starting_Expect(
+                RKH_CAST(InyectorControl, inyectorControl));
+
+    state = InyectorControl_dispatch(&eventStart);
     TEST_ASSERT_EQUAL(expectNextState, state);
 }
 
 void
 test_StateTransitionTableForStarting(void)
 {
-    setProfile(starting, idleSpeed, evStartTimeout);
-    state = InyectorControl_dispatch(&event);
+    _setProfile(starting, idleSpeed);
+    state = InyectorControl_dispatch(&eventStartTimeout);
     TEST_ASSERT_EQUAL(expectNextState, state);
 }
 
 void
 test_StateTransitionTableForIdleSpeed(void)
 {
-    setProfile(idleSpeed, idleSpeed, evTick);
-    InyectorControlAct_isReleasedThrottle_ExpectAndReturn(&event, true);
-    InyectorControlAct_onIdleSpeed_Expect(&event);
+    _setProfile(idleSpeed, idleSpeed);
+    InyectorControlAct_isReleasedThrottle_ExpectAndReturn(
+                RKH_CAST(InyectorControlevent, inyectorControl), RKH_TRUE);
+
+    InyectorControlAct_onIdleSpeed_Expect(&eventTick);
     state = InyectorControl_dispatch(&event);
     TEST_ASSERT_EQUAL(expectNextState, state);
 
-    setProfile(idleSpeed, normal, evTick);
-    InyectorControlAct_isReleasedThrottle_ExpectAndReturn(&event, false);
-    state = InyectorControl_dispatch(&event);
+    _setProfile(idleSpeed, normal);
+    InyectorControlAct_isReleasedThrottle_ExpectAndReturn(
+                RKH_CAST(InyectorControlevent, inyectorControl), RKH_FALSE);
+
+    state = InyectorControl_dispatch(&eventTick);
     TEST_ASSERT_EQUAL(expectNextState, state);
 }
 
 void
 test_StateTransitionTableForNormal(void)
 {
-    setProfile(normal, normal, evTick);
-    InyectorControlAct_isPressedThrottle_ExpectAndReturn(&event, true);
+    _setProfile(normal, normal);
+    InyectorControlAct_isPressedThrottle_ExpectAndReturn(
+                RKH_CAST(InyectorControlevent, inyectorControl), RKH_TRUE);
+
     InyectorControlAct_onNormal_Expect(&event);
-    state = InyectorControl_dispatch(&event);
+    state = InyectorControl_dispatch(&eventTick);
     TEST_ASSERT_EQUAL(expectNextState, state);
 
-    setProfile(normal, idleSpeed, evTick);
-    InyectorControlAct_isPressedThrottle_ExpectAndReturn(&event, false);
-    state = InyectorControl_dispatch(&event);
+    _setProfile(normal, idleSpeed);
+    InyectorControlAct_isPressedThrottle_ExpectAndReturn(
+                RKH_CAST(InyectorControlevent, inyectorControl), RKH_FALSE);
+
+    state = InyectorControl_dispatch(&eventTick);
     TEST_ASSERT_EQUAL(expectNextState, state);
 }
 
 void
 test_StateTransitionTableForNormal_UnhandledEvents(void)
 {
-    setProfile(normal, UNHANDLED_EVENT, evStart);
-    state = InyectorControl_dispatch(&event);
+    _setProfile(normal, UNHANDLED_EVENT);
+    state = InyectorControl_dispatch(&eventStart);
     TEST_ASSERT_EQUAL(expectNextState, state);
     TEST_ASSERT_EQUAL(normal, InyectorControl_getState());
 
-    setProfile(normal, UNHANDLED_EVENT, evStartTimeout);
-    state = InyectorControl_dispatch(&event);
+    _setProfile(normal, UNHANDLED_EVENT, evStartTimeout);
+    state = InyectorControl_dispatch(&eventStart);
     TEST_ASSERT_EQUAL(expectNextState, state);
     TEST_ASSERT_EQUAL(normal, InyectorControl_getState());
 }
-
+#endif
 /* ------------------------------ File footer ------------------------------ */
