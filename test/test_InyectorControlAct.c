@@ -45,6 +45,7 @@
 
 /* ----------------------------- Include files ----------------------------- */
 #include "unity.h"
+#include "InyectorControl.h"
 #include "InyectorControlAct.h"
 #include "Mock_RPMControl.h"
 #include "Mock_TempSensor.h"
@@ -52,15 +53,32 @@
 #include "Mock_ThrottleSensor.h"
 #include "Mock_PWMInyector.h"
 #include "Mock_Sensor.h"
-#include "Mock_Timer.h"
+#include "Mock_rkhtmr.h"
+#include "Mock_rkhassert.h"
+#include "Mock_rkhtrc_out.h"
+
+#include "rkh.h"
+/**************************************/
+/*
+ * Ceedling bug????
+ * https://github.com/ThrowTheSwitch/Ceedling/issues/10
+ * have to include all rkh header to force compilation because is not linking
+ */
+#include "rkhfwk_dynevt.h"
+#include "rkhsm.h"
+#include "rkhtrc.h"
+#include "rkhtrc_filter.h"
+#include "rkhtrc_record.h"
+#include "rkhfwk_bittbl.h"
+#include "rkhport.h"
+#include "rkhtrc_stream.h"
+/**************************************/
 
 /* ----------------------------- Local macros ------------------------------ */
 /* ------------------------------- Constants ------------------------------- */
 /* ---------------------------- Local data types --------------------------- */
 /* ---------------------------- Global variables --------------------------- */
 /* ---------------------------- Local variables ---------------------------- */
-static Event event;
-
 /* ----------------------- Local function prototypes ----------------------- */
 /* ---------------------------- Local functions ---------------------------- */
 /* ---------------------------- Global functions --------------------------- */
@@ -73,7 +91,7 @@ setUp(void)
     Mock_ThrottleSensor_Init();
     Mock_PWMInyector_Init();
     Mock_Sensor_Init();
-    Mock_Timer_Init();
+    Mock_rkhtmr_Init();
 }
 
 void
@@ -85,23 +103,25 @@ tearDown(void)
     Mock_ThrottleSensor_Verify();
     Mock_PWMInyector_Verify();
     Mock_Sensor_Verify();
-    Mock_Timer_Verify();
+    Mock_rkhtmr_Verify();
     Mock_RPMControl_Destroy();
     Mock_TempSensor_Destroy();
     Mock_RPMSensor_Destroy();
     Mock_ThrottleSensor_Destroy();
     Mock_PWMInyector_Destroy();
     Mock_Sensor_Destroy();
-    Mock_Timer_Destroy();
+    Mock_rkhtmr_Destroy();
 }
+
+static RKH_ROM_STATIC_EVENT(e_StartTimeout, evStartTimeout);
 
 void
 test_SetInitialValuesAfterInit(void)
 {
+    InyectorControl *const sma = (InyectorControl *const)inyectorControl;
     TempSensor *temp = (TempSensor *)0xdeadbeef;
     RPMSensor *rpm = (RPMSensor *)0xdeadbeef;
     ThrottleSensor *throttle = (ThrottleSensor *)0xdeadbeef;
-    Timer *tmr = (Timer *)0xdeadbeef;
 
     TempSensor_init_ExpectAndReturn(temp);
     RPMSensor_init_ExpectAndReturn(rpm);
@@ -109,22 +129,22 @@ test_SetInitialValuesAfterInit(void)
     RPMControl_init_Expect(IDLE_MIN_DUTY, IDLE_MAX_DUTY, IDLE_RPM, 
                            IDLE_RPM_THH, IDLE_RPM_THL);
     PWMInyector_init_Expect();
-    Timer_init_ExpectAndReturn(START_TIME, 0, evStartTimeout, tmr);
+    rkh_tmr_init__Expect(&sma->timer, &e_StartTimeout);
 
-    InyectorControlAct_init();
+    InyectorControlAct_init(RKH_CAST(InyectorControl, inyectorControl));
 }
 
+#if 0
 void
 test_SetDutyTo50ForAWhileOnStart(void)
 {
     Timer *tmr = (Timer *)0xdeadbeef;
-    event.signal = evStart;
 
     Timer_start_Expect(tmr);
     Timer_start_IgnoreArg_me();
     PWMInyector_setDuty_Expect(START_DUTY);
 
-    InyectorControlAct_starting(&event);
+    InyectorControlAct_starting(inyectorControl);
 }
 
 void
@@ -133,24 +153,22 @@ test_CheckPressedThrottle(void)
     bool result;
     Sensor *sensor = (Sensor *)0xdeadbeef;
 
-    event.signal = evTick;
-
     Sensor_get_ExpectAndReturn(sensor, THROTTLE_MIN - 1);
     Sensor_get_IgnoreArg_me();
 
-    result = InyectorControlAct_isPressedThrottle(&event);
+    result = InyectorControlAct_isPressedThrottle(inyectorControl);
     TEST_ASSERT_EQUAL(false, result);
 
     Sensor_get_ExpectAndReturn(sensor, THROTTLE_MIN);
     Sensor_get_IgnoreArg_me();
 
-    result = InyectorControlAct_isPressedThrottle(&event);
+    result = InyectorControlAct_isPressedThrottle(inyectorControl);
     TEST_ASSERT_EQUAL(false, result);
 
     Sensor_get_ExpectAndReturn(sensor, THROTTLE_MIN + 1);
     Sensor_get_IgnoreArg_me();
 
-    result = InyectorControlAct_isPressedThrottle(&event);
+    result = InyectorControlAct_isPressedThrottle(inyectorControl);
     TEST_ASSERT_EQUAL(true, result);
 }
 
@@ -163,8 +181,6 @@ test_SetDutyLinearlyWithThrottle(void)
                              THROTTLE_MIN + 20,
                              THROTTLE_MIN + 30};
     int *pThrottleValue;
-
-    event.signal = evTick;
 
     for (pThrottleValue = throttleValues; 
          pThrottleValue < throttleValues + 4; 
@@ -179,8 +195,8 @@ test_SetDutyLinearlyWithThrottle(void)
         Sensor_get_IgnoreArg_me();
         PWMInyector_setDuty_Expect(*pThrottleValue);
 
-        InyectorControlAct_isPressedThrottle(&event);
-        InyectorControlAct_onNormal(&event);
+        InyectorControlAct_isPressedThrottle(inyectorControl);
+        InyectorControlAct_onNormal(inyectorControl);
     }
 }
 
@@ -189,8 +205,6 @@ test_IncrementDutyForColdEngine(void)
 {
     Sensor *sensor = (Sensor *)0xdeadbeef;
     unsigned char duty = THROTTLE_MIN + 20;
-
-    event.signal = evTick;
 
     Sensor_get_ExpectAndReturn(sensor, duty);
     Sensor_get_IgnoreArg_me();
@@ -201,8 +215,8 @@ test_IncrementDutyForColdEngine(void)
     Sensor_get_IgnoreArg_me();
     PWMInyector_setDuty_Expect(duty + INC_DUTY_FOR_COLD);
 
-    InyectorControlAct_isPressedThrottle(&event);
-    InyectorControlAct_onNormal(&event);
+    InyectorControlAct_isPressedThrottle(inyectorControl);
+    InyectorControlAct_onNormal(inyectorControl);
 }
-
+#endif
 /* ------------------------------ File footer ------------------------------ */

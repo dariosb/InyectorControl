@@ -61,7 +61,11 @@ RKH_SMA_DCLR(inyectorControl);
 RKH_DCLR_BASIC_STATE off, starting, idleSpeed, normal;
 
 /* ------------------------------- Data types ------------------------------ */
-typedef struct InyectorControl InyectorControl;
+typedef struct InyectorControl
+{
+    RKH_SMA_T sma;  /* base structure */
+    RKH_TMR_T timer;
+}InyectorControl;
 
 /* -------------------------- External variables --------------------------- */
 /* -------------------------- Function prototypes -------------------------- */

@@ -17,13 +17,13 @@
 /* ----------------------------- Include files ----------------------------- */
 #include "rkh.h"
 #include "InyectorControl.h"
+#include "InyectorControlAct.h"
 #include "RPMControl.h"
 #include "TempSensor.h"
 #include "RPMSensor.h"
 #include "ThrottleSensor.h"
 #include "PWMInyector.h"
 #include "Sensor.h"
-#include "Timer.h"
 
 /* ----------------------------- Local macros ------------------------------ */
 /* ------------------------------- Constants ------------------------------- */
@@ -49,8 +49,7 @@ calcDutyFromThrottle(int currThrottleVal)
 void 
 InyectorControlAct_init(InyectorControl *const me)
 {
-    bsp_ovenInit();
-
+#if 0
     /* send objects to trazer */
     RKH_TR_FWK_AO(me);
     RKH_TR_FWK_STATE(me, &off);
@@ -70,6 +69,7 @@ InyectorControlAct_init(InyectorControl *const me)
     RKH_TR_FWK_SIG(evTick);
     RKH_TR_FWK_SIG(evTerm);
 
+#endif
     RKH_TMR_INIT(&me->timer, &e_StartTimeout, NULL);
 
     tempVal = rpmVal = throttleVal = 0;
@@ -81,7 +81,6 @@ InyectorControlAct_init(InyectorControl *const me)
     RPMControl_init(IDLE_MIN_DUTY, IDLE_MAX_DUTY, IDLE_RPM, IDLE_RPM_THH, 
                     IDLE_RPM_THL);
     PWMInyector_init();
-    RKH_TMR_INIT(&me->timer, &e_StartTimeout, NULL);
 }
 
 /* Effect actions */
@@ -113,18 +112,18 @@ InyectorControlAct_onNormal(InyectorControl *const me)
 
 
 /* Guard actions */
-bool 
+rbool_t  
 InyectorControlAct_isPressedThrottle(InyectorControl *const me)
 {
     throttleVal = Sensor_get((Sensor *)throttle);
-    return throttleVal > THROTTLE_MIN;
+    return (throttleVal > THROTTLE_MIN) ? RKH_TRUE : RKH_FALSE;
 }
 
-bool 
+rbool_t 
 InyectorControlAct_isReleasedThrottle(InyectorControl *const me)
 {
     throttleVal  = Sensor_get((Sensor *)throttle);
-    return throttleVal <= THROTTLE_MIN;
+    return (throttleVal <= THROTTLE_MIN) ? RKH_TRUE : RKH_FALSE;
 }
 
 

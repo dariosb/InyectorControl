@@ -49,12 +49,6 @@ RKH_CREATE_TRANS_TABLE(normal)
 RKH_END_TRANS_TABLE
 
 /* ---------------------------- Local data types --------------------------- */
-struct InyectorControl
-{
-    RKH_SMA_T sma;  /* base structure */
-    RKH_TMR_T timer;
-};
-
 /* ---------------------------- Global variables --------------------------- */
 /* ============================= Active object ============================= */
 RKH_SMA_CREATE( InyectorControl, inyectorControl,
