@@ -1,5 +1,5 @@
 /**
- *  \file test_InyectorControl.c
+ *  \file test_InyControl.c
  */
 
 /* -------------------------- Development history -------------------------- */
@@ -46,14 +46,12 @@
 /* ----------------------------- Include files ----------------------------- */
 #include "unity.h"
 #include "common.h"
-#include "rkh.h"
+#include "InyControl.h"
+#include "InyControlEvt.h"
+#include "Mock_InyControlAct.h"
+#include "Mock_rkhassert.h"
+#include "Mock_rkhtrc_out.h"
 
-/**************************************/
-/*
- * Ceedling bug????
- * https://github.com/ThrowTheSwitch/Ceedling/issues/10
- * have to include all rkh header to force compilation because is not linking
- */
 #include "rkhfwk_dynevt.h"
 #include "rkhsm.h"
 #include "rkhtrc.h"
@@ -62,12 +60,6 @@
 #include "rkhfwk_bittbl.h"
 #include "rkhport.h"
 #include "rkhtrc_stream.h"
-/**************************************/
-
-#include "InyectorControl.h"
-#include "Mock_InyectorControlAct.h"
-#include "Mock_rkhassert.h"
-#include "Mock_rkhtrc_out.h"
 
 /* ----------------------------- Local macros ------------------------------ */
 /* ------------------------------- Constants ------------------------------- */
@@ -76,16 +68,12 @@
 /* ---------------------------- Local variables ---------------------------- */
 static RKH_ST_T *state, *expectNextState;
 
-static RKH_STATIC_EVENT(eventStartTimeout, evStartTimeout);
-static RKH_STATIC_EVENT(eventStart,        evStart);
-static RKH_STATIC_EVENT(eventTick,         evTick);
-
 /* ----------------------- Local function prototypes ----------------------- */
 /* ---------------------------- Local functions ---------------------------- */
 static void
 setProfile(RKH_ST_T *currState, RKH_ST_T *nextState)
 {
-    setState((RKH_SMA_T *)inyectorControl, currState);
+    setState((RKH_SMA_T *)inyControl, currState);
     expectNextState = nextState;
 }
 
@@ -93,108 +81,140 @@ setProfile(RKH_ST_T *currState, RKH_ST_T *nextState)
 void
 setUp(void)
 {
-    Mock_InyectorControlAct_Init();
+    Mock_InyControlAct_Init();
+    Mock_rkhassert_Init();
+    Mock_rkhtrc_out_Init();
 }
 
 void
 tearDown(void)
 {
-    Mock_InyectorControlAct_Verify();
-    Mock_InyectorControlAct_Destroy();
+    Mock_InyControlAct_Verify();
+    Mock_rkhassert_Verify();
+    Mock_rkhtrc_out_Verify();
+
+    Mock_InyControlAct_Destroy();
+    Mock_rkhassert_Destroy();
+    Mock_rkhtrc_out_Destroy();
 }
 
 void
 test_DefaultStateAfterInit(void)
 {
+    RKH_SMA_T *sma = inyControl;
+    InyControl *const ic = (InyControl *const)inyControl;
+    RKH_SM_T *sm = (RKH_SM_T *)inyControl;
+
     setProfile(RKH_STATE_CAST(&off), RKH_STATE_CAST(&off));
 
-    InyectorControlAct_init_Expect(RKH_CAST(InyectorControl, inyectorControl));
+    InyControlAct_init_Expect(ic);
 
-    rkh_sm_init((RKH_SM_T *)inyectorControl);
+    rkh_sm_init(sm);
     
-    TEST_ASSERT_TRUE(expectNextState == getState(inyectorControl));
+    TEST_ASSERT_TRUE(expectNextState == getState(sma));
 }
 
 void
 test_AnUnhandledEventDoesNotChangeState(void)
 {
+    RKH_SMA_T *sma = inyControl;
+    RKH_SM_T *sm = (RKH_SM_T *)inyControl;
+
     setProfile(RKH_STATE_CAST(&off), RKH_STATE_CAST(&off));
     
-    rkh_sm_dispatch((RKH_SM_T *)inyectorControl, &eventStartTimeout);
+    rkh_sm_dispatch(sm, &e_StartTimeout);
 
-    TEST_ASSERT_TRUE(expectNextState == getState(inyectorControl));
+    TEST_ASSERT_TRUE(expectNextState == getState(sma));
 }
 
-#if 0
 void
 test_StateTransitionTableForOff(void)
 {
-    _setProfile(off, starting);
-    InyectorControlAct_starting_Expect(
-                RKH_CAST(InyectorControl, inyectorControl));
+    RKH_SMA_T *sma = inyControl;
+    InyControl *const ic = (InyControl *const)inyControl;
+    RKH_SM_T *sm = (RKH_SM_T *)inyControl;
 
-    state = InyectorControl_dispatch(&eventStart);
-    TEST_ASSERT_EQUAL(expectNextState, state);
+    setProfile(RKH_STATE_CAST(&off), RKH_STATE_CAST(&starting));
+
+    InyControlAct_starting_Expect(ic);
+
+    rkh_sm_dispatch(sm, &e_Start);
+
+    TEST_ASSERT_TRUE(expectNextState == getState(sma));
 }
 
 void
 test_StateTransitionTableForStarting(void)
 {
-    _setProfile(starting, idleSpeed);
-    state = InyectorControl_dispatch(&eventStartTimeout);
-    TEST_ASSERT_EQUAL(expectNextState, state);
+    RKH_SMA_T *sma = inyControl;
+    RKH_SM_T *sm = (RKH_SM_T *)inyControl;
+
+    setProfile(RKH_STATE_CAST(&starting), RKH_STATE_CAST(&idleSpeed));
+
+    rkh_sm_dispatch(sm, &e_StartTimeout);
+
+    TEST_ASSERT_EQUAL(expectNextState, getState(sma));
 }
 
 void
 test_StateTransitionTableForIdleSpeed(void)
 {
-    _setProfile(idleSpeed, idleSpeed);
-    InyectorControlAct_isReleasedThrottle_ExpectAndReturn(
-                RKH_CAST(InyectorControlevent, inyectorControl), RKH_TRUE);
+    RKH_SMA_T *sma = inyControl;
+    InyControl *const ic = (InyControl *const)inyControl;
+    RKH_SM_T *sm = (RKH_SM_T *)inyControl;
 
-    InyectorControlAct_onIdleSpeed_Expect(&eventTick);
-    state = InyectorControl_dispatch(&event);
-    TEST_ASSERT_EQUAL(expectNextState, state);
+    setProfile(RKH_STATE_CAST(&idleSpeed), RKH_STATE_CAST(&idleSpeed));
 
-    _setProfile(idleSpeed, normal);
-    InyectorControlAct_isReleasedThrottle_ExpectAndReturn(
-                RKH_CAST(InyectorControlevent, inyectorControl), RKH_FALSE);
+    InyControlAct_isRelThrottle_ExpectAndReturn(ic, RKH_TRUE);
+    InyControlAct_onIdleSpeed_Expect(ic);
 
-    state = InyectorControl_dispatch(&eventTick);
-    TEST_ASSERT_EQUAL(expectNextState, state);
+    rkh_sm_dispatch(sm, &e_Tick);
+    TEST_ASSERT_EQUAL(expectNextState, getState(sma));
+
+    setProfile(RKH_STATE_CAST(&idleSpeed), RKH_STATE_CAST(&normal));
+    InyControlAct_isRelThrottle_ExpectAndReturn(ic, RKH_FALSE);
+
+    rkh_sm_dispatch(sm, &e_Tick);
+    TEST_ASSERT_EQUAL(expectNextState, getState(sma));
 }
 
 void
 test_StateTransitionTableForNormal(void)
 {
-    _setProfile(normal, normal);
-    InyectorControlAct_isPressedThrottle_ExpectAndReturn(
-                RKH_CAST(InyectorControlevent, inyectorControl), RKH_TRUE);
+    RKH_SMA_T *sma = inyControl;
+    InyControl *const ic = (InyControl *const)inyControl;
+    RKH_SM_T *sm = (RKH_SM_T *)inyControl;
 
-    InyectorControlAct_onNormal_Expect(&event);
-    state = InyectorControl_dispatch(&eventTick);
-    TEST_ASSERT_EQUAL(expectNextState, state);
+    setProfile(RKH_STATE_CAST(&normal), RKH_STATE_CAST(&normal));
 
-    _setProfile(normal, idleSpeed);
-    InyectorControlAct_isPressedThrottle_ExpectAndReturn(
-                RKH_CAST(InyectorControlevent, inyectorControl), RKH_FALSE);
+    InyControlAct_isPressThrottle_ExpectAndReturn(ic, RKH_TRUE);
+    InyControlAct_onNormal_Expect(ic);
 
-    state = InyectorControl_dispatch(&eventTick);
-    TEST_ASSERT_EQUAL(expectNextState, state);
+    rkh_sm_dispatch(sm, &e_Tick);
+    TEST_ASSERT_EQUAL(expectNextState, getState(sma));
+
+    setProfile(RKH_STATE_CAST(&normal), RKH_STATE_CAST(&idleSpeed));
+    InyControlAct_isPressThrottle_ExpectAndReturn(ic, RKH_FALSE);
+
+    rkh_sm_dispatch(sm, &e_Tick);
+    TEST_ASSERT_EQUAL(expectNextState, getState(sma));
 }
 
 void
 test_StateTransitionTableForNormal_UnhandledEvents(void)
 {
-    _setProfile(normal, UNHANDLED_EVENT);
-    state = InyectorControl_dispatch(&eventStart);
-    TEST_ASSERT_EQUAL(expectNextState, state);
-    TEST_ASSERT_EQUAL(normal, InyectorControl_getState());
+    RKH_SMA_T *sma = inyControl;
+    InyControl *const ic = (InyControl *const)inyControl;
+    RKH_SM_T *sm = (RKH_SM_T *)inyControl;
 
-    _setProfile(normal, UNHANDLED_EVENT, evStartTimeout);
-    state = InyectorControl_dispatch(&eventStart);
-    TEST_ASSERT_EQUAL(expectNextState, state);
-    TEST_ASSERT_EQUAL(normal, InyectorControl_getState());
+    setProfile(RKH_STATE_CAST(&normal), RKH_STATE_CAST(&normal));
+
+    rkh_sm_dispatch(sm, &e_Start);
+    TEST_ASSERT_EQUAL(expectNextState, getState(sma));
+
+    setProfile(RKH_STATE_CAST(&normal), RKH_STATE_CAST(&normal));
+
+    rkh_sm_dispatch(sm, &e_StartTimeout);
+    TEST_ASSERT_EQUAL(expectNextState, getState(sma));
 }
-#endif
 /* ------------------------------ File footer ------------------------------ */

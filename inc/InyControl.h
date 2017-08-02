@@ -1,11 +1,11 @@
 /*
- *  \file       oven.h
- *  \brief      Example application.
+ *  \file       InyControl.h
+ *  \brief      Inyector Control RKH SMA.
  */
 
 /* -------------------------- Development history -------------------------- */
 /*
- *  2016.03.17  DaBa  v1.0.00  Initial version
+ *  2017.07.07  DaBa  v1.0.00  Initial version
  */
 
 /* -------------------------------- Authors -------------------------------- */
@@ -15,8 +15,8 @@
 
 /* --------------------------------- Notes --------------------------------- */
 /* --------------------------------- Module -------------------------------- */
-#ifndef __INYECTORCONTROL_H__
-#define __INYECTORCONTROL_H__
+#ifndef __INYCONTROL_H__
+#define __INYCONTROL_H__
 
 /* ----------------------------- Include files ----------------------------- */
 #include "rkh.h"
@@ -46,7 +46,7 @@ extern "C" {
 #define true                1
 
 /* ================================ Signals ================================ */
-typedef enum InyectorControl_sigs_t
+typedef enum InyControl_sigs_t
 {
     evStart,
     evStartTimeout,
@@ -55,17 +55,17 @@ typedef enum InyectorControl_sigs_t
 } IC_SIGS_T;
 
 /* ======================== Declares active object ========================= */
-RKH_SMA_DCLR(inyectorControl);
+RKH_SMA_DCLR(inyControl);
 
 /* =================== Declares states and pseudostates ==================== */
 RKH_DCLR_BASIC_STATE off, starting, idleSpeed, normal;
 
 /* ------------------------------- Data types ------------------------------ */
-typedef struct InyectorControl
+typedef struct InyControl
 {
     RKH_SMA_T sma;  /* base structure */
     RKH_TMR_T timer;
-}InyectorControl;
+}InyControl;
 
 /* -------------------------- External variables --------------------------- */
 /* -------------------------- Function prototypes -------------------------- */

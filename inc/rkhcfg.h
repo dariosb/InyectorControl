@@ -174,7 +174,7 @@
  *	not included: state nesting, composite state, history (shallow and deep)
  *	pseudostate, entry action, and exit action.
  */
-#define RKH_CFG_SMA_HCAL_EN             RKH_DISABLED
+#define RKH_CFG_SMA_HCAL_EN             RKH_ENABLED
 
 /**
  *  Specify the maximum number of hierarchical levels. The smaller this
@@ -361,7 +361,7 @@
  *	If the #RKH_CFG_TRC_EN is set to 1 then RKH will include the trace
  *	facility.
  */
-#define RKH_CFG_TRC_EN                  RKH_ENABLED
+#define RKH_CFG_TRC_EN                  RKH_DISABLED
 
 /**
  *	If the #RKH_CFG_TRC_RTFIL_EN is set to 1 then RKH will include

@@ -1,23 +1,24 @@
 /** 
- * \file InyectorControlAct.c 
+ *  \file       InyControlAct.c 
+ *  \brief      Inyector Control RKH SMA actions.
  */
 
 /* -------------------------- Development history -------------------------- */
 /*
- *  2016.03.17  DaBa  v1.0.00  Initial version
+ *  2017.07.07  DaBa  v1.0.00  Initial version
  */
 
 /* -------------------------------- Authors -------------------------------- */
 /*
- *  LeFr  Leandro Francucci  francuccilea@gmail.com
  *  Daba  Darío Baliña       dariosb@gmail.com
  */
 
 /* --------------------------------- Notes --------------------------------- */
 /* ----------------------------- Include files ----------------------------- */
 #include "rkh.h"
-#include "InyectorControl.h"
-#include "InyectorControlAct.h"
+#include "InyControl.h"
+#include "InyControlEvt.h"
+#include "InyControlAct.h"
 #include "RPMControl.h"
 #include "TempSensor.h"
 #include "RPMSensor.h"
@@ -35,7 +36,6 @@ static TempSensor *temp;
 static RPMSensor *rpm;
 static ThrottleSensor *throttle;
 static unsigned char duty;
-static RKH_ROM_STATIC_EVENT(e_StartTimeout, evStartTimeout);
 
 /* ----------------------- Local function prototypes ----------------------- */
 static int
@@ -47,30 +47,26 @@ calcDutyFromThrottle(int currThrottleVal)
 /* ---------------------------- Global functions --------------------------- */
 /* Init action */
 void 
-InyectorControlAct_init(InyectorControl *const me)
+InyControlAct_init(InyControl *const me)
 {
-#if 0
     /* send objects to trazer */
     RKH_TR_FWK_AO(me);
     RKH_TR_FWK_STATE(me, &off);
     RKH_TR_FWK_STATE(me, &starting);
     RKH_TR_FWK_STATE(me, &normal);
     RKH_TR_FWK_OBJ(&me->timer);
-    RKH_TR_FWK_FUN(&InyectorControlAct_init);
-    RKH_TR_FWK_FUN(&InyectorControlAct_onIdleSpeed);
-    RKH_TR_FWK_FUN(&InyectorControlAct_onNormal);
-    RKH_TR_FWK_FUN(&InyectorControlAct_isPressedThrottle);
-    RKH_TR_FWK_FUN(&InyectorControlAct_isReleasedThrottle);
-    RKH_TR_FWK_FUN(&InyectorControlAct_starting);
+    RKH_TR_FWK_FUN(&InyControlAct_init);
+    RKH_TR_FWK_FUN(&InyControlAct_onIdleSpeed);
+    RKH_TR_FWK_FUN(&InyControlAct_onNormal);
+    RKH_TR_FWK_FUN(&InyControlAct_isPressedThrottle);
+    RKH_TR_FWK_FUN(&InyControlAct_isReleasedThrottle);
+    RKH_TR_FWK_FUN(&InyControlAct_starting);
 
     /* send signals to trazer */
     RKH_TR_FWK_SIG(evStart);
     RKH_TR_FWK_SIG(evStartTimeout);
     RKH_TR_FWK_SIG(evTick);
     RKH_TR_FWK_SIG(evTerm);
-
-#endif
-    RKH_TMR_INIT(&me->timer, &e_StartTimeout, NULL);
 
     tempVal = rpmVal = throttleVal = 0;
     duty = 0;
@@ -81,11 +77,13 @@ InyectorControlAct_init(InyectorControl *const me)
     RPMControl_init(IDLE_MIN_DUTY, IDLE_MAX_DUTY, IDLE_RPM, IDLE_RPM_THH, 
                     IDLE_RPM_THL);
     PWMInyector_init();
+
+    RKH_TMR_INIT(&me->timer, &e_StartTimeout, NULL);
 }
 
 /* Effect actions */
 void 
-InyectorControlAct_onIdleSpeed(InyectorControl *const me)
+InyControlAct_onIdleSpeed(InyControl *const me)
 {
     tempVal = Sensor_get((Sensor *)temp);
     rpmVal = Sensor_get((Sensor *)rpm);
@@ -95,7 +93,7 @@ InyectorControlAct_onIdleSpeed(InyectorControl *const me)
 }
 
 void 
-InyectorControlAct_onNormal(InyectorControl *const me)
+InyControlAct_onNormal(InyControl *const me)
 {
     tempVal = Sensor_get((Sensor *)temp);
     rpmVal = Sensor_get((Sensor *)rpm);
@@ -113,14 +111,14 @@ InyectorControlAct_onNormal(InyectorControl *const me)
 
 /* Guard actions */
 rbool_t  
-InyectorControlAct_isPressedThrottle(InyectorControl *const me)
+InyControlAct_isPressThrottle(InyControl *const me)
 {
     throttleVal = Sensor_get((Sensor *)throttle);
     return (throttleVal > THROTTLE_MIN) ? RKH_TRUE : RKH_FALSE;
 }
 
 rbool_t 
-InyectorControlAct_isReleasedThrottle(InyectorControl *const me)
+InyControlAct_isRelThrottle(InyControl *const me)
 {
     throttleVal  = Sensor_get((Sensor *)throttle);
     return (throttleVal <= THROTTLE_MIN) ? RKH_TRUE : RKH_FALSE;
@@ -129,7 +127,7 @@ InyectorControlAct_isReleasedThrottle(InyectorControl *const me)
 
 /* Entry actions */
 void 
-InyectorControlAct_starting(InyectorControl *const me)
+InyControlAct_starting(InyControl *const me)
 {
     RKH_TMR_ONESHOT(&me->timer, RKH_UPCAST(RKH_SMA_T, me), START_TIME);
     PWMInyector_setDuty(START_DUTY);

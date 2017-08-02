@@ -37,7 +37,6 @@
     - vendor/rkh/source/queue/src
     - vendor/rkh/source/sm/src
     - vendor/rkh/source/sma/src
-    - vendor/rkh/source/tmr/src
     - vendor/rkh/source/trc/src
   :include:
     - inc/**
