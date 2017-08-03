@@ -1,9 +1,17 @@
 ---
 
-# Notes:
-# Sample project C code is not presently written to produce a release artifact.
-# As such, release build options are disabled.
-# This sample, therefore, only demonstrates running a collection of unit tests.
+#  \file test_InyControl.c
+# -------------------------- Development history --------------------------
+
+#   2017.06.21  LeFr  v1.0.00  Initial version
+#   2017.07.07  Daba  v1.1.00  No fixture
+
+# -------------------------------- Authors --------------------------------
+
+#  DaBa  Dario Baliña  	 dariosb@gmail.com
+
+# --------------------------------- Notes ---------------------------------
+# Example Ceedling yml file for testing RKH Inyector Control statechart
 
 :project:
   :use_exceptions: FALSE
@@ -97,10 +105,12 @@
 # tests or releases. These options are MERGED with the options in supplemental yaml files.
 :libraries:
   :placement: :end
-  :flag: "${1}"  # or "-L ${1}" for example
+  :flag: "${1}" 
   :common: &common_libraries []
-  :test:
+  :system:
     - vendor/unitrazer/unitrzlib.a
+    - -lstdc++
+  :test:
     - *common_libraries
   :release:
     - *common_libraries
