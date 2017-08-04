@@ -73,6 +73,10 @@
 /* ---------------------------- Local variables ---------------------------- */
 static RKH_ST_T *state, *expectNextState;
 
+static RKH_SMA_T *sma;
+static InyControl *ic;
+static RKH_SM_T *sm;
+
 /* ----------------------- Local function prototypes ----------------------- */
 /* ---------------------------- Local functions ---------------------------- */
 static void
@@ -88,6 +92,10 @@ setUp(void)
 {
 	int argc=0;
 	char *argv[]={"programName", NULL};
+
+	sma = inyControl;
+	ic = (InyControl *)inyControl;
+	sm = (RKH_SM_T *)inyControl;
 
 	tzlink_open(argc, argv);
     sm_init(); 
@@ -107,6 +115,12 @@ setUp(void)
     RKH_FILTER_OFF_GROUP_ALL_EVENTS(RKH_TG_SM);
     RKH_FILTER_OFF_SMA(inyControl);
     RKH_FILTER_OFF_EVENT(RKH_TE_FWK_ASSERT);
+
+	sm_trn_ignore();
+	sm_tsState_ignore();
+	sm_ntrnact_ignore();
+	sm_nenex_ignore();
+	sm_evtProc_ignore();
 }
 
 void
@@ -124,67 +138,56 @@ tearDown(void)
 void
 test_DefaultStateAfterInit(void)
 {
-    RKH_SMA_T *sma = inyControl;
-    InyControl *const ic = (InyControl *const)inyControl;
-    RKH_SM_T *sm = (RKH_SM_T *)inyControl;
-	UtrzProcessOut *p;
-
 	sm_init_expect(RKH_STATE_CAST(&off));
     sm_enstate_expect(RKH_STATE_CAST(&off));
     InyControlAct_init_Expect(ic);
 
     rkh_sm_init(sm);
 
-    p = unitrazer_getLastOut();
-    TEST_ASSERT_EQUAL(UT_PROC_SUCCESS, p->status);
+    TEST_ASSERT_EQUAL(UT_PROC_SUCCESS, unitrazer_getLastOut()->status);
 }
 
 void
 test_AnUnhandledEventDoesNotChangeState(void)
 {
-    RKH_SMA_T *sma = inyControl;
-    RKH_SM_T *sm = (RKH_SM_T *)inyControl;
-	UtrzProcessOut *p;
-
 	sm_dch_expect(evStartTimeout, RKH_STATE_CAST(&off));
 	sm_evtNotFound_expect(evStartTimeout);
 
     rkh_sm_dispatch(sm, &e_StartTimeout);
 
-    p = unitrazer_getLastOut();
-    TEST_ASSERT_EQUAL(UT_PROC_SUCCESS, p->status);
+    TEST_ASSERT_EQUAL(UT_PROC_SUCCESS, unitrazer_getLastOut()->status);
 }
 
-#if 0
 void
 test_StateTransitionTableForOff(void)
 {
-    RKH_SMA_T *sma = inyControl;
-    InyControl *const ic = (InyControl *const)inyControl;
-    RKH_SM_T *sm = (RKH_SM_T *)inyControl;
-
     setProfile(RKH_STATE_CAST(&off), RKH_STATE_CAST(&starting));
-
+	sm_dch_expect(evStart, RKH_STATE_CAST(&off));
+	sm_exstate_expect(RKH_STATE_CAST(&off));
+	sm_enstate_expect(RKH_STATE_CAST(&starting));
+	sm_state_expect(RKH_STATE_CAST(&starting));
     InyControlAct_starting_Expect(ic);
 
     rkh_sm_dispatch(sm, &e_Start);
 
-    TEST_ASSERT_TRUE(expectNextState == getState(sma));
+    TEST_ASSERT_EQUAL(UT_PROC_SUCCESS, unitrazer_getLastOut()->status);
 }
 
 void
 test_StateTransitionTableForStarting(void)
 {
-    RKH_SMA_T *sma = inyControl;
-    RKH_SM_T *sm = (RKH_SM_T *)inyControl;
-
     setProfile(RKH_STATE_CAST(&starting), RKH_STATE_CAST(&idleSpeed));
+	sm_dch_expect(evStartTimeout, RKH_STATE_CAST(&starting));
+	sm_exstate_expect(RKH_STATE_CAST(&starting));
+	sm_enstate_expect(RKH_STATE_CAST(&idleSpeed));
+	sm_state_expect(RKH_STATE_CAST(&idleSpeed));
 
     rkh_sm_dispatch(sm, &e_StartTimeout);
 
-    TEST_ASSERT_EQUAL(expectNextState, getState(sma));
+    TEST_ASSERT_EQUAL(UT_PROC_SUCCESS, unitrazer_getLastOut()->status);
 }
 
+#if 0
 void
 test_StateTransitionTableForIdleSpeed(void)
 {
