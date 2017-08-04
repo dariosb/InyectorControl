@@ -86,26 +86,39 @@ setProfile(RKH_ST_T *currState, RKH_ST_T *nextState)
 void
 setUp(void)
 {
+	int argc=0;
+	char *argv[]={"programName", NULL};
+
+	tzlink_open(argc, argv);
     sm_init(); 
     Mock_InyControlAct_Init();
     Mock_rkhassert_Init();
- //   Mock_rkhtrc_out_Init();
+//    Mock_rkhtrc_out_Init();
+
+    RKH_TR_FWK_AO(inyControl);
+    RKH_TR_FWK_STATE(inyControl, &off);
+    RKH_TR_FWK_STATE(inyControl, &starting);
+    RKH_TR_FWK_STATE(inyControl, &normal);
+    RKH_TR_FWK_SIG(evStart);
+    RKH_TR_FWK_SIG(evStartTimeout);
+    RKH_TR_FWK_SIG(evTick);
+
+	RKH_FILTER_OFF_ALL_SIGNALS();
+    RKH_FILTER_OFF_GROUP_ALL_EVENTS(RKH_TG_SM);
+    RKH_FILTER_OFF_SMA(inyControl);
+    RKH_FILTER_OFF_EVENT(RKH_TE_FWK_ASSERT);
 }
 
 void
 tearDown(void)
 {
-    sm_verify(); /* Makes sure there are no unused expectations, if */
-                 /* there are, this function causes the test to fail. */
-    sm_cleanup();
-
+    sm_verify();
     Mock_InyControlAct_Verify();
     Mock_rkhassert_Verify();
-//    Mock_rkhtrc_out_Verify();
 
+    sm_cleanup();
     Mock_InyControlAct_Destroy();
     Mock_rkhassert_Destroy();
-//    Mock_rkhtrc_out_Destroy();
 }
 
 void
@@ -114,14 +127,16 @@ test_DefaultStateAfterInit(void)
     RKH_SMA_T *sma = inyControl;
     InyControl *const ic = (InyControl *const)inyControl;
     RKH_SM_T *sm = (RKH_SM_T *)inyControl;
+	UtrzProcessOut *p;
 
-    setProfile(RKH_STATE_CAST(&off), RKH_STATE_CAST(&off));
-
+	sm_init_expect(RKH_STATE_CAST(&off));
+    sm_enstate_expect(RKH_STATE_CAST(&off));
     InyControlAct_init_Expect(ic);
 
     rkh_sm_init(sm);
-    
-    TEST_ASSERT_TRUE(expectNextState == getState(sma));
+
+    p = unitrazer_getLastOut();
+    TEST_ASSERT_EQUAL(UT_PROC_SUCCESS, p->status);
 }
 
 void
@@ -129,14 +144,18 @@ test_AnUnhandledEventDoesNotChangeState(void)
 {
     RKH_SMA_T *sma = inyControl;
     RKH_SM_T *sm = (RKH_SM_T *)inyControl;
+	UtrzProcessOut *p;
 
-    setProfile(RKH_STATE_CAST(&off), RKH_STATE_CAST(&off));
-    
+	sm_dch_expect(evStartTimeout, RKH_STATE_CAST(&off));
+	sm_evtNotFound_expect(evStartTimeout);
+
     rkh_sm_dispatch(sm, &e_StartTimeout);
 
-    TEST_ASSERT_TRUE(expectNextState == getState(sma));
+    p = unitrazer_getLastOut();
+    TEST_ASSERT_EQUAL(UT_PROC_SUCCESS, p->status);
 }
 
+#if 0
 void
 test_StateTransitionTableForOff(void)
 {
@@ -227,4 +246,5 @@ test_StateTransitionTableForNormal_UnhandledEvents(void)
     rkh_sm_dispatch(sm, &e_StartTimeout);
     TEST_ASSERT_EQUAL(expectNextState, getState(sma));
 }
+#endif
 /* ------------------------------ File footer ------------------------------ */

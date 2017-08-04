@@ -138,7 +138,7 @@
  *  when is put a trace event into the stream buffer.
  *  When this is set the application must provide the hook function.
  */
-#define RKH_CFG_HOOK_PUT_TRCEVT_EN        RKH_DISABLED
+#define RKH_CFG_HOOK_PUT_TRCEVT_EN        RKH_ENABLED
 
 /**
  *  Specify the frequency of the framework tick interrupt (number of ticks
@@ -232,7 +232,7 @@
  *	If the #RKH_CFG_SMA_TRC_SNDR_EN and #RKH_CFG_TRC_EN are set to 1,
  *	when posting an event the RKH inserts a pointer to the sender object.
  */
-#define RKH_CFG_SMA_TRC_SNDR_EN         RKH_DISABLED
+#define RKH_CFG_SMA_TRC_SNDR_EN         RKH_ENABLED
 
 /**
  *	If the #RKH_CFG_SMA_INIT_EVT_EN is set to 1 then an initial event could
@@ -423,7 +423,7 @@
  *	If the #RKH_CFG_TRC_TMR_EN is set to 1 then RKH will include all trace
  *	records related to the native software timer.
  */
-#define RKH_CFG_TRC_TMR_EN              RKH_ENABLED
+#define RKH_CFG_TRC_TMR_EN              RKH_DISABLED
 
 /**
  *	If the #RKH_CFG_TRC_SM_EN is set to 1 then RKH will include all trace
@@ -447,25 +447,25 @@
  *	If the #RKH_CFG_TRC_SM_INIT_EN and #RKH_CFG_TRC_SM_EN are set to 1 then
  *	RKH will include the "init state machine" trace record.
  */
-#define RKH_CFG_TRC_SM_INIT_EN          RKH_DISABLED
+#define RKH_CFG_TRC_SM_INIT_EN          RKH_ENABLED
 
 /**
  *	If the #RKH_CFG_TRC_SM_DCH_EN and #RKH_CFG_TRC_SM_EN are set to 1 then
  *	RKH will include the "start a state machine" trace record.
  */
-#define RKH_CFG_TRC_SM_DCH_EN          RKH_DISABLED
+#define RKH_CFG_TRC_SM_DCH_EN          RKH_ENABLED
 
 /**
  *	If the #RKH_CFG_TRC_SM_CLRH_EN and #RKH_CFG_TRC_SM_EN are set to 1 then
  *	RKH will include the "dispatch an event to state machine" trace record.
  */
-#define RKH_CFG_TRC_SM_CLRH_EN          RKH_DISABLED
+#define RKH_CFG_TRC_SM_CLRH_EN          RKH_ENABLED
 
 /**
  *	If the #RKH_CFG_TRC_SM_CLRH_EN and #RKH_CFG_TRC_SM_EN are set to 1 then
  *	RKH will include the "clear the history pseudostate" trace record.
  */
-#define RKH_CFG_TRC_SM_TRN_EN           RKH_DISABLED
+#define RKH_CFG_TRC_SM_TRN_EN           RKH_ENABLED
 
 /**
  *	If the #RKH_CFG_TRC_SM_STATE_EN and #RKH_CFG_TRC_SM_EN are set to 1 then
@@ -477,47 +477,47 @@
  *	If the #RKH_CFG_TRC_SM_CLRH_EN and #RKH_CFG_TRC_SM_EN are set to 1 then
  *	RKH will include the "entry state" trace record.
  */
-#define RKH_CFG_TRC_SM_ENSTATE_EN       RKH_DISABLED
+#define RKH_CFG_TRC_SM_ENSTATE_EN       RKH_ENABLED
 
 /**
  *	If the #RKH_CFG_TRC_SM_CLRH_EN and #RKH_CFG_TRC_SM_EN are set to 1 then
  *	RKH will include the "exit state" trace record.
  */
-#define RKH_CFG_TRC_SM_EXSTATE_EN       RKH_DISABLED
+#define RKH_CFG_TRC_SM_EXSTATE_EN       RKH_ENABLED
 
 /**
  *	If the #RKH_CFG_TRC_SM_CLRH_EN and #RKH_CFG_TRC_SM_EN are set to 1 then
  *	RKH will include the "number of entry and exit states in transition"
  *	trace record.
  */
-#define RKH_CFG_TRC_SM_NENEX_EN         RKH_DISABLED
+#define RKH_CFG_TRC_SM_NENEX_EN         RKH_ENABLED
 
 /**
  *	If the #RKH_CFG_TRC_SM_CLRH_EN and #RKH_CFG_TRC_SM_EN are set to 1 then
  *	RKH will include the "number of executed actions in transition" trace
  *	record.
  */
-#define RKH_CFG_TRC_SM_NTRNACT_EN       RKH_DISABLED
+#define RKH_CFG_TRC_SM_NTRNACT_EN       RKH_ENABLED
 
 /**
  *	If the #RKH_CFG_TRC_SM_CLRH_EN and #RKH_CFG_TRC_SM_EN are set to 1 then
  *	RKH will include the "state or pseudostate in a compound transition"
  *	trace record.
  */
-#define RKH_CFG_TRC_SM_TS_STATE_EN      RKH_DISABLED
+#define RKH_CFG_TRC_SM_TS_STATE_EN      RKH_ENABLED
 
 /**
  *	If the #RKH_CFG_TRC_SM_CLRH_EN and #RKH_CFG_TRC_SM_EN are set to 1 then
  *	RKH will include the "returned code from dispatch function" trace record.
  */
-#define RKH_CFG_TRC_SM_PROCESS_EN       RKH_DISABLED
+#define RKH_CFG_TRC_SM_PROCESS_EN       RKH_ENABLED
 
 /**
  *	If the #RKH_CFG_TRC_SM_EXE_ACT_EN and #RKH_CFG_TRC_SM_EN are set to 1
  *	then RKH will include the "executed behavior of state machine" trace
  *	record.
  */
-#define RKH_CFG_TRC_SM_EXE_ACT_EN       RKH_ENABLED
+#define RKH_CFG_TRC_SM_EXE_ACT_EN       RKH_DISABLED
 
 /**
  *	If the #RKH_CFG_TRC_NSEQ_EN is set to 1 then RKH will add to the trace
@@ -543,7 +543,7 @@
  *	Specify the maximum number of trace events in the stream. The smaller
  *	this number, the lower the RAM consumption.
  */
-#define RKH_CFG_TRC_SIZEOF_STREAM       128u
+#define RKH_CFG_TRC_SIZEOF_STREAM       512u
 
 /* --- Configuration options related to queue (by reference) facility ----- */
 
