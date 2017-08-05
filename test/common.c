@@ -55,6 +55,7 @@
 /* ----------------------------- Include files ----------------------------- */
 #include "rkh.h"
 #include "common.h"
+#include "unitrazer.h"
 
 /* ----------------------------- Local macros ------------------------------ */
 /* ------------------------------- Constants ------------------------------- */
@@ -63,7 +64,6 @@
 /* ---------------------------- Local variables ---------------------------- */
 /* ----------------------- Local function prototypes ----------------------- */
 /* ---------------------------- Local functions ---------------------------- */
-#if 0
 static
 int
 executeExpectOnList(const RKH_ST_T **stateList, int kindOfExpect)
@@ -90,7 +90,7 @@ executeExpectOnList(const RKH_ST_T **stateList, int kindOfExpect)
     }
     return n;
 }
-#endif
+
 /* ---------------------------- Global functions --------------------------- */
 const RKH_ST_T *
 getHistory(const RKH_SHIST_T *history)
@@ -110,7 +110,6 @@ setState(RKH_SMA_T *const me, const RKH_ST_T *state)
     ((RKH_SM_T *)me)->state = state;
 }
 
-#if 0
 void
 setProfile(RKH_SMA_T *const me, const RKH_ST_T *currentState, 
            const RKH_ST_T *sourceState, const RKH_ST_T **targetStates, 
@@ -152,7 +151,6 @@ setProfile(RKH_SMA_T *const me, const RKH_ST_T *currentState,
     if (currentState)
         setState(me, RKH_STATE_CAST(currentState));
 }
-#endif
 
 void
 setProfileWoutUnitrazer(RKH_SMA_T *const me, 

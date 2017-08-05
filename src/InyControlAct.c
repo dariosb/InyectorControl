@@ -49,25 +49,6 @@ calcDutyFromThrottle(int currThrottleVal)
 void 
 InyControlAct_init(InyControl *const me)
 {
-    /* send objects to trazer */
-    RKH_TR_FWK_AO(me);
-    RKH_TR_FWK_STATE(me, &off);
-    RKH_TR_FWK_STATE(me, &starting);
-    RKH_TR_FWK_STATE(me, &normal);
-    RKH_TR_FWK_OBJ(&me->timer);
-    RKH_TR_FWK_FUN(&InyControlAct_init);
-    RKH_TR_FWK_FUN(&InyControlAct_onIdleSpeed);
-    RKH_TR_FWK_FUN(&InyControlAct_onNormal);
-    RKH_TR_FWK_FUN(&InyControlAct_isPressedThrottle);
-    RKH_TR_FWK_FUN(&InyControlAct_isReleasedThrottle);
-    RKH_TR_FWK_FUN(&InyControlAct_starting);
-
-    /* send signals to trazer */
-    RKH_TR_FWK_SIG(evStart);
-    RKH_TR_FWK_SIG(evStartTimeout);
-    RKH_TR_FWK_SIG(evTick);
-    RKH_TR_FWK_SIG(evTerm);
-
     tempVal = rpmVal = throttleVal = 0;
     duty = 0;
 

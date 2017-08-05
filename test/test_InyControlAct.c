@@ -6,6 +6,7 @@
 /*
  *  2017.06.21  LeFr  v1.0.00  Initial version
  *  2017.07.07  Daba  v1.1.00  No fixture
+ *  2017.07.30  Daba  v2.0.00  unitrazer
  */
 
 /* -------------------------------- Authors -------------------------------- */
@@ -56,7 +57,6 @@
 #include "Mock_Sensor.h"
 #include "Mock_rkhtmr.h"
 #include "Mock_rkhassert.h"
-#include "Mock_rkhtrc_out.h"
 
 #include "rkhfwk_dynevt.h"
 #include "rkhsm.h"
@@ -67,17 +67,26 @@
 #include "rkhport.h"
 #include "rkhtrc_stream.h"
 
+#include "unitrazer.h"
+#include "unitrzlib.h"
+#include "tzlink.h"
+#include "tzparse.h"
+
 /* ----------------------------- Local macros ------------------------------ */
 /* ------------------------------- Constants ------------------------------- */
 /* ---------------------------- Local data types --------------------------- */
 /* ---------------------------- Global variables --------------------------- */
 /* ---------------------------- Local variables ---------------------------- */
+static InyControl *ic;
+
 /* ----------------------- Local function prototypes ----------------------- */
 /* ---------------------------- Local functions ---------------------------- */
 /* ---------------------------- Global functions --------------------------- */
 void
 setUp(void)
 {
+    ic = (InyControl *)inyControl;
+
     Mock_RPMControl_Init();
     Mock_TempSensor_Init();
     Mock_RPMSensor_Init();
@@ -86,7 +95,6 @@ setUp(void)
     Mock_Sensor_Init();
     Mock_rkhtmr_Init();
     Mock_rkhassert_Init();
-    Mock_rkhtrc_out_Init();
 }
 
 void
@@ -100,7 +108,6 @@ tearDown(void)
     Mock_Sensor_Verify();
     Mock_rkhtmr_Verify();
     Mock_rkhassert_Verify();
-    Mock_rkhtrc_out_Verify();
 
     Mock_RPMControl_Destroy();
     Mock_TempSensor_Destroy();
@@ -110,13 +117,11 @@ tearDown(void)
     Mock_Sensor_Destroy();
     Mock_rkhtmr_Destroy();
     Mock_rkhassert_Destroy();
-    Mock_rkhtrc_out_Destroy();
 }
 
 void
 test_SetInitialValuesAfterInit(void)
 {
-    InyControl *const ic = (InyControl *const)inyControl;
     TempSensor *temp = (TempSensor *)0xdeadbeef;
     RPMSensor *rpm = (RPMSensor *)0xdeadbeef;
     ThrottleSensor *throttle = (ThrottleSensor *)0xdeadbeef;
@@ -136,8 +141,6 @@ test_SetInitialValuesAfterInit(void)
 void
 test_SetDutyTo50ForAWhileOnStart(void)
 {
-    InyControl *const ic = (InyControl *const)inyControl;
-
 	rkh_tmr_start_Expect(&ic->timer, RKH_UPCAST(RKH_SMA_T, ic), START_TIME );
 
     PWMInyector_setDuty_Expect(START_DUTY);
@@ -150,7 +153,6 @@ test_CheckPressedThrottle(void)
 {
     rbool_t result;
     Sensor *sensor = (Sensor *)0xdeadbeef;
-    InyControl *const ic = (InyControl *const)inyControl;
 
     Sensor_get_ExpectAndReturn(sensor, THROTTLE_MIN - 1);
     Sensor_get_IgnoreArg_me();
@@ -180,7 +182,6 @@ test_SetDutyLinearlyWithThrottle(void)
                              THROTTLE_MIN + 20,
                              THROTTLE_MIN + 30};
     int *pThrottleValue;
-    InyControl *const ic = (InyControl *const)inyControl;
 
     for (pThrottleValue = throttleValues; 
          pThrottleValue < throttleValues + 4; 
@@ -205,7 +206,6 @@ test_IncrementDutyForColdEngine(void)
 {
     Sensor *sensor = (Sensor *)0xdeadbeef;
     unsigned char duty = THROTTLE_MIN + 20;
-    InyControl *const ic = (InyControl *const)inyControl;
 
     Sensor_get_ExpectAndReturn(sensor, duty);
     Sensor_get_IgnoreArg_me();
@@ -219,4 +219,5 @@ test_IncrementDutyForColdEngine(void)
     InyControlAct_isPressThrottle(ic);
     InyControlAct_onNormal(ic);
 }
+
 /* ------------------------------ File footer ------------------------------ */
