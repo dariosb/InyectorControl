@@ -1,10 +1,11 @@
 ---
 
-#  \file test_InyControl.c
+#  \file project.yml
 # -------------------------- Development history --------------------------
 
 #   2017.06.21  LeFr  v1.0.00  Initial version
 #   2017.07.07  Daba  v1.1.00  No fixture
+#   2017.07.30  Daba  v2.0.00  unitrazer
 
 # -------------------------------- Authors --------------------------------
 
@@ -17,7 +18,7 @@
   :use_exceptions: FALSE
   :use_test_preprocessor: TRUE
   :use_auxiliary_dependencies: TRUE
-  :build_root: build
+  :build_root: build/ceedling
 #  :release_build: TRUE
   :test_file_prefix: test_
   :which_ceedling: vendor/ceedling
