@@ -1,0 +1,11 @@
+# Build dir
+
+ceedling/*
+
+!ceedling/.gitkeep 
+
+*.log
+*.swp
+*.un~
+*.*~
+*.o

@@ -29,25 +29,20 @@ typedef struct TempSensor
 
 /* ---------------------------- Global variables --------------------------- */
 /* ---------------------------- Local variables ---------------------------- */
-static int TempSensor_get(Sensor *const me);
-static const SensorVtbl vtbl = { TempSensor_get };
-static TempSensor temperature=
-{
-    { &vtbl, "Temperature", SensorTemp, 0 } 
-};
-
 /* ----------------------- Local function prototypes ----------------------- */
 /* ---------------------------- Local functions ---------------------------- */
 static int
 TempSensor_get(Sensor *const me)
 {
-    temperature.sensor.value = bsp_TempSensorRead();
-    return temperature.sensor.value;
+    return me->value = bsp_TempSensorRead();
 }
 
 /* ---------------------------- Global functions --------------------------- */
 TempSensor *TempSensor_init(void)
 {
+	static const SensorVtbl vtbl = { TempSensor_get };
+	static TempSensor temperature= { { &vtbl, "Temperature", SensorTemp, 0 } };
+
     return &temperature; 
 }
 

@@ -29,23 +29,22 @@ typedef struct ThrottleSensor
 
 /* ---------------------------- Global variables --------------------------- */
 /* ---------------------------- Local variables ---------------------------- */
-static int ThrottleSensor_get(Sensor *const me);
-static const SensorVtbl vtbl = { ThrottleSensor_get };
-static ThrottleSensor throttle = { { &vtbl, "Throttle", SensorThrottle, 0 } };
-
 /* ----------------------- Local function prototypes ----------------------- */
 /* ---------------------------- Local functions ---------------------------- */
 static int
 ThrottleSensor_get(Sensor *const me)
 {
-    throttle.sensor.value = bsp_ThrottleSensorRead();
-    return throttle.sensor.value;
+    me->value = bsp_ThrottleSensorRead();
+    return me->value;
 }
 
 /* ---------------------------- Global functions --------------------------- */
 ThrottleSensor *
 ThrottleSensor_init(void)
 {
+	static const SensorVtbl vtbl = { ThrottleSensor_get };
+	static ThrottleSensor throttle = {{&vtbl, "Throttle", SensorThrottle, 0}};
+
     return &throttle;
 }
 
