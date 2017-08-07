@@ -64,6 +64,11 @@ extern "C" {
 /* ------------------------------- Data types ------------------------------ */
 /* -------------------------- External variables --------------------------- */
 /* -------------------------- Function prototypes -------------------------- */
+void bsp_PWMInyector_setDuty(unsigned char duty);
+int bsp_TempSensorRead(void);
+int bsp_RPMSensorRead(void);
+int bsp_ThrottleSensorRead(void);
+
 /* -------------------- External C language linkage end -------------------- */
 #ifdef __cplusplus
 }

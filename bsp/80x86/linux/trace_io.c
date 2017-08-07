@@ -69,7 +69,7 @@
  */
 #define BSP_TS_RATE_HZ              CLOCKS_PER_SEC
 
-#define TRACE_CFG_CONSOLE_OPTIONS   "t:f:p:h"
+#define TRACE_CFG_CONSOLE_OPTIONS   "t:f:p:sh"
 
 /* ---------------------------- Local data types --------------------------- */
 /* ---------------------------- Global variables --------------------------- */
@@ -81,12 +81,13 @@ static const char *helpMessage =
     "\t -f File name for binary trace output\n"
     "\t -t ipaddr of TCP trace client\n"
     "\t -p port of TCP trace client\n"
+    "\t -s stand alone, no trazer\n"
     "\t -h (help)\n"
 };
 
 static TRACE_CFG_ST config =
 {
-    "", TCP_TRC_IP_ADDR_DFT, TCP_TRC_PORT_DFT
+    "", TCP_TRC_IP_ADDR_DFT, TCP_TRC_PORT_DFT, TCP_TRC_STANDALON_DFT
 };
 
 static FILE *ftbin = NULL;
@@ -115,6 +116,10 @@ trace_io_setConfig(int argc, char **argv)
                 config.tcpPort= (short)atoi(optarg);
                 break;
 
+            case 's':
+                config.standAlone = 1;
+                break;
+
             case '?':
             case 'h':
                 printf(helpMessage);
@@ -126,6 +131,9 @@ void
 rkh_trc_open(void)
 {
     rkh_trc_init();
+
+    if( config.standAlone )
+        return;
 
     if (strlen(config.ftbinName) != 0)
     {
@@ -149,6 +157,9 @@ rkh_trc_open(void)
 void
 rkh_trc_close(void)
 {
+    if( config.standAlone )
+        return;
+
     if (ftbin != NULL)
     {
         fclose(ftbin);
@@ -170,6 +181,9 @@ rkh_trc_flush(void)
 
 	while( ( d = rkh_trc_get() ) != ( rui8_t* )0 )
 	{
+        if( config.standAlone )
+            return;
+
         if (ftbin != NULL)
         {
             fwrite(d, 1, 1, ftbin);

@@ -16,25 +16,39 @@
 /* --------------------------------- Notes --------------------------------- */
 /* ----------------------------- Include files ----------------------------- */
 #include "TempSensor.h"
+#include "Sensor.h"
+#include "bsp.h"
 
 /* ----------------------------- Local macros ------------------------------ */
 /* ------------------------------- Constants ------------------------------- */
 /* ---------------------------- Local data types --------------------------- */
 typedef struct TempSensor
 {
-    int value;
+    Sensor sensor;
 }TempSensor;
 
 /* ---------------------------- Global variables --------------------------- */
 /* ---------------------------- Local variables ---------------------------- */
-static TempSensor tempSensor;
+static int TempSensor_get(Sensor *const me);
+static const SensorVtbl vtbl = { TempSensor_get };
+static TempSensor temperature=
+{
+    { &vtbl, "Temperature", SensorTemp, 0 } 
+};
 
 /* ----------------------- Local function prototypes ----------------------- */
 /* ---------------------------- Local functions ---------------------------- */
+static int
+TempSensor_get(Sensor *const me)
+{
+    temperature.sensor.value = bsp_TempSensorRead();
+    return temperature.sensor.value;
+}
+
 /* ---------------------------- Global functions --------------------------- */
 TempSensor *TempSensor_init(void)
 {
-    return &tempSensor; 
+    return &temperature; 
 }
 
 /* ------------------------------ End of file ------------------------------ */

@@ -64,6 +64,7 @@ extern "C" {
 
 #define TCP_TRC_IP_ADDR_DFT         "127.0.0.1"
 #define TCP_TRC_PORT_DFT             6602
+#define TCP_TRC_STANDALON_DFT        0
 
 /* ------------------------------- Data types ------------------------------ */
 typedef struct
@@ -71,6 +72,7 @@ typedef struct
     char ftbinName[FTBIN_NAME_STR_LEN];
     char tcpIpAddr[TCP_IPADDR_STR_LEN];
     short tcpPort;
+    char standAlone;
 } TRACE_CFG_ST;
 
 /* -------------------------- External variables --------------------------- */

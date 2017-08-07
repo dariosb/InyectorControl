@@ -16,26 +16,37 @@
 /* --------------------------------- Notes --------------------------------- */
 /* ----------------------------- Include files ----------------------------- */
 #include "ThrottleSensor.h"
+#include "Sensor.h"
+#include "bsp.h"
 
 /* ----------------------------- Local macros ------------------------------ */
 /* ------------------------------- Constants ------------------------------- */
 /* ---------------------------- Local data types --------------------------- */
 typedef struct ThrottleSensor
 {
-    int value;
+    Sensor sensor;
 }ThrottleSensor;
 
 /* ---------------------------- Global variables --------------------------- */
 /* ---------------------------- Local variables ---------------------------- */
-static ThrottleSensor throttleSensor;
+static int ThrottleSensor_get(Sensor *const me);
+static const SensorVtbl vtbl = { ThrottleSensor_get };
+static ThrottleSensor throttle = { { &vtbl, "Throttle", SensorThrottle, 0 } };
 
 /* ----------------------- Local function prototypes ----------------------- */
 /* ---------------------------- Local functions ---------------------------- */
+static int
+ThrottleSensor_get(Sensor *const me)
+{
+    throttle.sensor.value = bsp_ThrottleSensorRead();
+    return throttle.sensor.value;
+}
+
 /* ---------------------------- Global functions --------------------------- */
 ThrottleSensor *
 ThrottleSensor_init(void)
 {
-    return &throttleSensor;
+    return &throttle;
 }
 
 /* ------------------------------ End of file ------------------------------ */

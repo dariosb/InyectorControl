@@ -28,6 +28,8 @@
 int
 Sensor_get(Sensor *const me)
 {
+    if(me->id != SensorInvalid)
+        return me->vptr->get(me);
     return 0;
 }
 

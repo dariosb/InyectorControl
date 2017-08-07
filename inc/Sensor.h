@@ -25,6 +25,14 @@ extern "C" {
 
 /* --------------------------------- Macros -------------------------------- */
 /* -------------------------------- Constants ------------------------------ */
+enum
+{
+    SensorInvalid,
+    SensorTemp,
+    SensorThrottle,
+    SensorRPM
+};
+
 /* ------------------------------- Data types ------------------------------ */
 typedef struct SensorVtbl SensorVtbl;
 typedef struct Sensor Sensor;
